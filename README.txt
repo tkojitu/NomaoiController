@@ -6,7 +6,7 @@ NomaoiController can find MIDI input device. You can play it:
 
   $ java -jar dist/lib/NomaoiController.jar
 
-If you want to specify your device, use -d option that dump all MIDI devices:
+If you want to specify your device, use -d option that dumps all MIDI devices:
 
   $ java -jar dist/lib/NomaoiController.jar -d
 
@@ -33,7 +33,7 @@ In my Ubuntu 11.10 PC:
    Software sequencer
    Oracle Corporation
 
-My MIDI input device (M-Audio Keystation Mini 32) has #1. So:
+My MIDI input device has #1. So:
 
   $ java -jar dist/lib/NomaoiController.jar 1
 
@@ -42,5 +42,8 @@ My development env:
   ASUS EeePC 901 (CPU: Intel Atom N270 1.6GHzx2, Memory: 2.0GB)
   Ubuntu 11.10
   JDK 1.7.0_01
+  M-Audio Keystation Mini 32 (USB)
 
 In my env, NomaoiController has a bit latency. Because of CPU power?
+
+NomaoiController is public domain.
