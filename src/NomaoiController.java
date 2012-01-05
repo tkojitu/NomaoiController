@@ -17,8 +17,9 @@ public class NomaoiController implements Runnable {
             System.exit(1);
         }
         synth = MidiSystem.getSynthesizer();
+        Receiver recv = new AsSoonAsPossibleReceiver(synth.getReceiver());
         Transmitter trans = midiIn.getTransmitter();
-        trans.setReceiver(synth.getReceiver());
+        trans.setReceiver(recv);
         midiIn.open();
         synth.open();
     }
@@ -85,5 +86,24 @@ public class NomaoiController implements Runnable {
         }
         app.setup(midiInPort);
         SwingUtilities.invokeLater(app);
+    }
+}
+
+class AsSoonAsPossibleReceiver implements Receiver {
+    private Receiver receiver;
+
+    public AsSoonAsPossibleReceiver(Receiver realReceiver) {
+        receiver = realReceiver;
+    }
+
+    public void close() {
+        if (receiver == null) {
+            return;
+        }
+        receiver.close();
+    }
+
+    public void send(MidiMessage message, long timeStamp) {
+        receiver.send(message, -1);
     }
 }
