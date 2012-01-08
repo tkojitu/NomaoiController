@@ -6,33 +6,49 @@ import javax.swing.*;
 
 public class NomaoiController implements Runnable {
     MidiDevice midiIn;
-    Synthesizer synth;
+    MidiDevice midiOut;
 
     public NomaoiController() {}
 
-    public void setup(int midiInPort) throws MidiUnavailableException {
-        midiIn = findMidiInDevice(midiInPort);
+    public void setup(int indexMidiIn, int indexMidiOut) throws MidiUnavailableException {
+        midiIn = findMidiInDevice(indexMidiIn);
         if (midiIn == null) {
             System.err.println("cannot find midi input device.");
             System.exit(1);
         }
-        synth = MidiSystem.getSynthesizer();
-        Receiver recv = new AsSoonAsPossibleReceiver(synth.getReceiver());
+        midiOut = findMidiOutDevice(indexMidiOut);
+        Receiver recv = new AsSoonAsPossibleReceiver(midiOut.getReceiver());
         Transmitter trans = midiIn.getTransmitter();
         trans.setReceiver(recv);
         midiIn.open();
-        synth.open();
+        midiOut.open();
     }
 
-    private MidiDevice findMidiInDevice(int midiInPort) throws MidiUnavailableException {
+    private MidiDevice findMidiInDevice(int index) throws MidiUnavailableException {
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
-        if (0 <= midiInPort && midiInPort < infos.length) {
-            return MidiSystem.getMidiDevice(infos[midiInPort]);
+        if (0 <= index && index < infos.length) {
+            return MidiSystem.getMidiDevice(infos[index]);
         }
         final String klass = "class com.sun.media.sound.MidiInDevice";
         for (int i = 0; i < infos.length; ++ i) {
             MidiDevice dev = MidiSystem.getMidiDevice(infos[i]);
             if (klass.equals(dev.getClass().toString())) {
+                return dev;
+            }
+        }
+        return null;
+    }
+
+    private MidiDevice findMidiOutDevice(int index) throws MidiUnavailableException {
+        MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
+        if (0 <= index && index < infos.length) {
+            return MidiSystem.getMidiDevice(infos[index]);
+        }
+        final String klass = "class com.sun.media.sound.MidiOutDevice";
+        for (int i = 0; i < infos.length; ++ i) {
+            MidiDevice dev = MidiSystem.getMidiDevice(infos[i]);
+            if (dev instanceof Synthesizer
+                || klass.equals(dev.getClass().toString())) {
                 return dev;
             }
         }
@@ -76,16 +92,36 @@ public class NomaoiController implements Runnable {
 
     public static void main(String[] args) throws Exception {
         NomaoiController app = new NomaoiController();
-        int midiInPort = -1;
-        if (args.length > 0) {
-            if (args[0].equals("-d")) {
-                app.dumpMidiDevices();
-                return;
-            }
-            midiInPort = Integer.parseInt(args[0]);
-        }
-        app.setup(midiInPort);
+        app.dumpMidiDevices();
+        int indexMidiIn = getDeviceIndexMidiIn(args);
+        int indexMidiOut = getDeviceIndexMidiOut(args);
+        app.setup(indexMidiIn, indexMidiOut);
         SwingUtilities.invokeLater(app);
+    }
+
+    private static int getDeviceIndexMidiIn(String[] args) {
+        return getOptionArg(args, "-i");
+    }
+
+    private static int getDeviceIndexMidiOut(String[] args) {
+        return getOptionArg(args, "-o");
+    }
+
+    private static int getOptionArg(String[] args, String opt) {
+        for (int i = 0; i < args.length; ++i) {
+            if (opt.equals(args[i])) {
+                if (i + 1 >= args.length) {
+                    return -1;
+                }
+                try {
+                    return Integer.parseInt(args[i + 1]);
+                } catch (NumberFormatException e) {
+                    System.out.println("illegal index: " + args[i + 1]);
+                    return -1;
+                }
+            }
+        }
+        return -1;
     }
 }
 
