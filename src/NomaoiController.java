@@ -133,8 +133,8 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         return pane;
     }
 
-    private JComboBox createCombox(MidiDevice dev) {
-        JComboBox combox = new JComboBox(getMidiDeviceNames());
+    private JComboBox<String> createCombox(MidiDevice dev) {
+        JComboBox<String> combox = new JComboBox<String>(getMidiDeviceNames());
         setSelectComboxItem(combox, dev);
         combox.addActionListener(this);
         return combox;
