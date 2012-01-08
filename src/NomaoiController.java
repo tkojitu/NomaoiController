@@ -73,7 +73,7 @@ public class NomaoiController implements Runnable {
     }
 
     private JFrame createFrame() {
-        JFrame frame = new JFrame("NomaoiKeyboard");
+        JFrame frame = new JFrame("NomaoiController");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(createPane());
         frame.pack();
