@@ -27,6 +27,8 @@
     <exec executable="java" dir="${basedir}">
       <arg value="-jar"/>
       <arg value="dist/lib/NomaoiController.jar"/>
+      <arg value="-p"/>
+      <arg value="80"/>
     </exec>
   </target>
 

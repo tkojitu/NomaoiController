@@ -20,7 +20,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         close();
     }
 
-    public void setup(int indexMidiIn, int indexMidiOut)
+    public void setup(int indexMidiIn, int indexMidiOut, int indexInst)
             throws MidiUnavailableException {
         midiIn = findMidiInDevice(indexMidiIn);
         if (midiIn == null) {
@@ -33,11 +33,14 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         trans.setReceiver(recv);
         midiIn.open();
         midiOut.open();
+        setInstrument(indexInst);
 
         System.out.println("Input:");
         dumpMidiDevice(midiIn);
         System.out.println("Output:");
         dumpMidiDevice(midiOut);
+        System.out.println("Instruments:");
+        dumpInstruments(midiOut);
     }
 
     private MidiDevice findMidiInDevice(int index) throws MidiUnavailableException {
@@ -72,6 +75,46 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         return null;
     }
 
+    private void setInstrument(int index) {
+        loadInstrument(index);
+        programChange(index);
+    }
+
+    private boolean loadInstrument(int index) {
+        if (!(midiOut instanceof Synthesizer)) {
+            System.out.println("" + midiOut + " is not a Synthesizer.");
+            return false;
+        }
+        Instrument inst = selectInstrument((Synthesizer)midiOut, index);
+        if (inst == null) {
+            return false;
+        }
+        ((Synthesizer)midiOut).loadInstrument(inst);
+        return true;
+    }
+
+    private Instrument selectInstrument(Synthesizer synth, int index) {
+        Soundbank bank = synth.getDefaultSoundbank();
+        if (bank == null) {
+            System.out.println("" + synth + " does not have a SoundBank.");
+            return null;
+        }
+        Instrument[] insts = synth.getDefaultSoundbank().getInstruments();
+        if (index < 0 || index <= insts.length) {
+            return insts[0];
+        }
+        return insts[index];
+    }
+
+    private void programChange(int program) {
+        if (!(midiOut instanceof Synthesizer)) {
+            System.out.println("" + midiOut + " is not a Synthesizer.");
+            return;
+        }
+        MidiChannel[] channels = ((Synthesizer)midiOut).getChannels();
+        channels[0].programChange((program < 0) ? 0 : program);
+    }
+
     public void dumpMidiDevices() throws MidiUnavailableException {
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
@@ -87,6 +130,23 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         System.out.println(" " + info.getName());
         System.out.println(" " + info.getDescription());
         System.out.println(" " + info.getVendor());
+    }
+
+    private void dumpInstruments(MidiDevice dev) {
+        if (!(dev instanceof Synthesizer)) {
+            System.out.println("" + dev + " is not a Synthesizer.");
+            return;
+        }
+        Synthesizer synth = (Synthesizer)dev;
+        Soundbank bank = synth.getDefaultSoundbank();
+        if (bank == null) {
+            System.out.println("" + dev + " does not have a SoundBank.");
+            return;
+        }
+        Instrument[] insts = synth.getDefaultSoundbank().getInstruments();
+        for (int i = 0; i < insts.length; ++i) {
+            System.out.println(" " + i + ": " + insts[i].getName());
+        }
     }
 
     public void createAndShowGui() {
@@ -232,7 +292,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         }
         close();
         try {
-            setup(indexIn, indexOut);
+            setup(indexIn, indexOut, 0);
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         }
@@ -249,7 +309,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         }
         close();
         try {
-            setup(indexIn, indexOut);
+            setup(indexIn, indexOut, 0);
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         }
@@ -260,7 +320,8 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         app.dumpMidiDevices();
         int indexMidiIn = getDeviceIndexMidiIn(args);
         int indexMidiOut = getDeviceIndexMidiOut(args);
-        app.setup(indexMidiIn, indexMidiOut);
+        int indexInst = getInstrumentIndex(args);
+        app.setup(indexMidiIn, indexMidiOut, indexInst);
         SwingUtilities.invokeLater(app);
     }
 
@@ -270,6 +331,10 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
 
     private static int getDeviceIndexMidiOut(String[] args) {
         return getOptionArg(args, "-o");
+    }
+
+    private static int getInstrumentIndex(String[] args) {
+        return getOptionArg(args, "-p");
     }
 
     private static int getOptionArg(String[] args, String opt) {
