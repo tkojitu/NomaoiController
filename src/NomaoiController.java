@@ -90,28 +90,25 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
     }
 
     public void createAndShowGui() {
-        JFrame frame = createFrame();
+        JFrame frame = newFrame();
         frame.setVisible(true);
     }
 
-    private JFrame createFrame() {
+    private JFrame newFrame() {
         JFrame frame = new JFrame("NomaoiController");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(createPane());
+        frame.setContentPane(newPane());
         frame.pack();
         return frame;
     }
 
-    private JPanel createPane() {
+    private JPanel newPane() {
         JPanel pane = new JPanel();
-        GroupLayout layout = new GroupLayout(pane);
-        layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-        pane.setLayout(layout);
+        GroupLayout layout = setGroupLayout(pane);
         JLabel labelInTitle = new JLabel("MIDI Input: ");
-        comboxIn = createCombox(midiIn);
+        comboxIn = newCombox(midiIn);
         JLabel labelOutTitle = new JLabel("MIDI Output: ");
-        comboxOut = createCombox(midiOut);
+        comboxOut = newCombox(midiOut);
 
         GroupLayout.SequentialGroup groupH = layout.createSequentialGroup();
         groupH.addGroup(layout.createParallelGroup().
@@ -133,7 +130,15 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         return pane;
     }
 
-    private JComboBox<String> createCombox(MidiDevice dev) {
+    private GroupLayout setGroupLayout(JPanel pane) {
+        GroupLayout layout = new GroupLayout(pane);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        pane.setLayout(layout);
+        return layout;
+    }
+
+    private JComboBox<String> newCombox(MidiDevice dev) {
         JComboBox<String> combox = new JComboBox<String>(getMidiDeviceNames());
         setSelectComboxItem(combox, dev);
         combox.addActionListener(this);
