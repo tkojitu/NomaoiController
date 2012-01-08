@@ -1,6 +1,7 @@
 package nomaoi;
 
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import javax.sound.midi.*;
 import javax.swing.*;
 
@@ -82,8 +83,37 @@ public class NomaoiController implements Runnable {
 
     private JPanel createPane() {
         JPanel pane = new JPanel();
-        pane.setPreferredSize(new Dimension(320, 240));
+        pane.setLayout(new GridLayout(2, 2));
+        addMidiInLabels(pane);
+        addMidiOutLabels(pane);
         return pane;
+    }
+
+    private void addMidiInLabels(JPanel pane) {
+        JLabel labelInTitle = new JLabel("MIDI Input: ", JLabel.RIGHT);
+        pane.add(labelInTitle);
+        JLabel labelIn = new JLabel(getMidiInName(), JLabel.LEFT);
+        pane.add(labelIn);
+    }
+
+    private void addMidiOutLabels(JPanel pane) {
+        JLabel labelOutTitle = new JLabel("MIDI Output: ", JLabel.RIGHT);
+        pane.add(labelOutTitle);
+        JLabel labelOut = new JLabel(getMidiOutName(), JLabel.LEFT);
+        pane.add(labelOut);
+    }
+
+    private String getMidiInName() {
+        return getMidiDeviceName(midiIn);
+    }
+
+    private String getMidiOutName() {
+        return getMidiDeviceName(midiOut);
+    }
+
+    private String getMidiDeviceName(MidiDevice dev) {
+        MidiDevice.Info info = dev.getDeviceInfo();
+        return info.getName();
     }
 
     public void run() {
