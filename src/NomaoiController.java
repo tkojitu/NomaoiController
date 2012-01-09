@@ -21,8 +21,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
+    private JFrame frame;
     private MidiDevice midiIn;
     private MidiDevice midiOut;
+    private PCKeyboard keyboard = new PCKeyboard();
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
 
@@ -37,10 +39,6 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
     public void setup(int indexMidiIn, int indexMidiOut, int indexInst)
             throws MidiUnavailableException {
         midiIn = findMidiInDevice(indexMidiIn);
-        if (midiIn == null) {
-            System.err.println("cannot find midi input device.");
-            System.exit(1);
-        }
         midiOut = findMidiOutDevice(indexMidiOut);
         Receiver recv = new AsSoonAsPossibleReceiver(midiOut.getReceiver());
         Transmitter trans = midiIn.getTransmitter();
@@ -53,8 +51,8 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         dumpMidiDevice(midiIn);
         System.out.println("Output:");
         dumpMidiDevice(midiOut);
-        System.out.println("Instruments:");
-        dumpInstruments(midiOut);
+        // System.out.println("Instruments:");
+        // dumpInstruments(midiOut);
     }
 
     private MidiDevice findMidiInDevice(int index) throws MidiUnavailableException {
@@ -69,7 +67,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
                 return dev;
             }
         }
-        return null;
+        return keyboard;
     }
 
     private MidiDevice findMidiOutDevice(int index)
@@ -164,12 +162,12 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
     }
 
     public void createAndShowGui() {
-        JFrame frame = newFrame();
+        newFrame();
         frame.setVisible(true);
     }
 
     private JFrame newFrame() {
-        JFrame frame = new JFrame("NomaoiController");
+        frame = new JFrame("NomaoiController");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setContentPane(newPane());
         frame.pack();
@@ -180,8 +178,12 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         JPanel pane = new JPanel();
         GroupLayout layout = setGroupLayout(pane);
         JLabel labelInTitle = new JLabel("MIDI Input: ");
+        labelInTitle.setFocusable(true);
+        labelInTitle.addKeyListener(keyboard);
         comboxIn = newCombox(midiIn);
         JLabel labelOutTitle = new JLabel("MIDI Output: ");
+        labelOutTitle.setFocusable(true);
+        labelOutTitle.addKeyListener(keyboard);
         comboxOut = newCombox(midiOut);
 
         GroupLayout.SequentialGroup groupH = layout.createSequentialGroup();

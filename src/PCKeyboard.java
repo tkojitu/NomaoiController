@@ -22,6 +22,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
 
     @Override
     public void keyPressed(KeyEvent event) {
+        System.out.println("keyPressed");
         if (closing) {
             return;
         }
@@ -32,6 +33,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
         }
         int note = keyCodeToNote(code);
         note = modifyNote(event, note);
+        noteOff();
         noteOn(note);
     }
 
