@@ -5,11 +5,12 @@ import java.awt.event.ActionListener;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.sound.midi.Instrument;
-import javax.sound.midi.MidiChannel;
+import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Transmitter;
@@ -25,7 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class NomaoiController implements ActionListener, AutoCloseable, ChangeListener,
-                                         Runnable {
+                                           Runnable {
     private JFrame frame;
     private MidiDevice midiIn;
     private MidiDevice midiOut;
@@ -33,6 +34,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
     private JSpinner spinInst;
+    private ShortMessage message = new ShortMessage();
     private int indexInst = 0;
 
     public NomaoiController() {}
@@ -53,7 +55,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         midiIn.open();
         midiOut.open();
         this.indexInst = indexInst;
-        setInstrument(indexInst);
+        programChange(indexInst);
 
         System.out.println("Input:");
         dumpMidiDevice(midiIn);
@@ -95,44 +97,17 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         return null;
     }
 
-    private void setInstrument(int index) {
-        loadInstrument(index);
-        programChange(index);
-    }
-
-    private boolean loadInstrument(int index) {
-        if (!(midiOut instanceof Synthesizer)) {
-            System.out.println("" + midiOut + " is not a Synthesizer.");
-            return false;
+    private void programChange(int index) {
+        indexInst = index;
+        try {
+            message.setMessage(ShortMessage.PROGRAM_CHANGE, 0, indexInst, 0);
+            Receiver recv = midiOut.getReceiver();
+            recv.send(message, -1);
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
+        } catch (MidiUnavailableException e) {
+            e.printStackTrace();
         }
-        Instrument inst = selectInstrument((Synthesizer)midiOut, index);
-        if (inst == null) {
-            return false;
-        }
-        ((Synthesizer)midiOut).loadInstrument(inst);
-        return true;
-    }
-
-    private Instrument selectInstrument(Synthesizer synth, int index) {
-        Soundbank bank = synth.getDefaultSoundbank();
-        if (bank == null) {
-            System.out.println("" + synth + " does not have a SoundBank.");
-            return null;
-        }
-        Instrument[] insts = synth.getDefaultSoundbank().getInstruments();
-        if (index < 0 || index <= insts.length) {
-            return insts[0];
-        }
-        return insts[index];
-    }
-
-    private void programChange(int program) {
-        if (!(midiOut instanceof Synthesizer)) {
-            System.out.println("" + midiOut + " is not a Synthesizer.");
-            return;
-        }
-        MidiChannel[] channels = ((Synthesizer)midiOut).getChannels();
-        channels[0].programChange((program < 0) ? 0 : program);
     }
 
     public void dumpMidiDevices() throws MidiUnavailableException {
@@ -225,23 +200,10 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         return result;
     }
 
-    private JSpinner newSpinner() {
-        int max = getMaxInstruments();
-        if (max > 0) {
-            --max;
-        }
-        SpinnerNumberModel numModel = new SpinnerNumberModel(0, 0, max, 1);
-        JSpinner result = new JSpinner(numModel);
-        result.getModel().setValue(new Integer(indexInst));
-        result.setEditor(new JSpinner.DefaultEditor(result));
-        result.addChangeListener(this);
-        return result;
-    }
-
     private int getMaxInstruments() {
         if (!(midiOut instanceof Synthesizer)) {
-            System.out.println("" + midiOut + " is not a Synthesizer.");
-            return 0;
+            System.out.println("" + midiOut.getDeviceInfo() + " is not a Synthesizer.");
+            return 128;
         }
         Synthesizer synth = (Synthesizer)midiOut;
         Soundbank bank = synth.getDefaultSoundbank();
@@ -316,6 +278,19 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         return -1;
     }
 
+    private JSpinner newSpinner() {
+        int max = getMaxInstruments();
+        if (max > 0) {
+            --max;
+        }
+        SpinnerNumberModel numModel = new SpinnerNumberModel(0, 0, max, 1);
+        JSpinner result = new JSpinner(numModel);
+        result.getModel().setValue(new Integer(indexInst));
+        result.setEditor(new JSpinner.DefaultEditor(result));
+        result.addChangeListener(this);
+        return result;
+    }
+
     @Override
     public void run() {
         createAndShowGui();
@@ -342,13 +317,6 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
             resetMidiOut(comboxOut.getItemAt(comboxOut.getSelectedIndex()));
             return;
         }
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent event) {
-        Number num = (Number)spinInst.getModel().getValue();
-        indexInst = num.intValue();
-        setInstrument(indexInst);
     }
 
     private void resetMidiIn(String item) {
@@ -383,6 +351,12 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent event) {
+        Number num = (Number)spinInst.getModel().getValue();
+        programChange(num.intValue());
     }
 
     public static void main(String[] args) throws Exception {
