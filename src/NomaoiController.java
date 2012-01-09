@@ -33,6 +33,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
     private JSpinner spinInst;
+    private int indexInst = 0;
 
     public NomaoiController() {}
 
@@ -51,6 +52,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         trans.setReceiver(recv);
         midiIn.open();
         midiOut.open();
+        this.indexInst = indexInst;
         setInstrument(indexInst);
 
         System.out.println("Input:");
@@ -230,6 +232,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         }
         SpinnerNumberModel numModel = new SpinnerNumberModel(0, 0, max, 1);
         JSpinner result = new JSpinner(numModel);
+        result.getModel().setValue(new Integer(indexInst));
         result.setEditor(new JSpinner.DefaultEditor(result));
         result.addChangeListener(this);
         return result;
@@ -343,7 +346,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
 
     @Override
     public void stateChanged(ChangeEvent event) {
-        System.out.println("stateChanged");
+        Number num = (Number)spinInst.getModel().getValue();
+        indexInst = num.intValue();
+        setInstrument(indexInst);
     }
 
     private void resetMidiIn(String item) {
@@ -399,7 +404,8 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private static int getInstrumentIndex(String[] args) {
-        return getOptionArg(args, "-p");
+        int n = getOptionArg(args, "-p");
+        return (n < 0) ? 0 : n;
     }
 
     private static int getOptionArg(String[] args, String opt) {
