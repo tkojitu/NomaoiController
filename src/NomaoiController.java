@@ -18,15 +18,21 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
+public class NomaoiController implements ActionListener, AutoCloseable, ChangeListener,
+                                         Runnable {
     private JFrame frame;
     private MidiDevice midiIn;
     private MidiDevice midiOut;
     private PCKeyboard keyboard = new PCKeyboard();
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
+    private JSpinner spinInst;
 
     public NomaoiController() {}
 
@@ -181,14 +187,18 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         comboxIn = newCombox(midiIn);
         JLabel labelOutTitle = newLabel("MIDI Output:");
         comboxOut = newCombox(midiOut);
+        JLabel labelInst = newLabel("Instrument:");
+        spinInst = newSpinner();
 
         GroupLayout.SequentialGroup groupH = layout.createSequentialGroup();
         groupH.addGroup(layout.createParallelGroup().
                         addComponent(labelInTitle).
-                        addComponent(labelOutTitle));
+                        addComponent(labelOutTitle).
+                        addComponent(labelInst));
         groupH.addGroup(layout.createParallelGroup().
                         addComponent(comboxIn).
-                        addComponent(comboxOut));
+                        addComponent(comboxOut).
+                        addComponent(spinInst));
         layout.setHorizontalGroup(groupH);
 
         GroupLayout.SequentialGroup groupV = layout.createSequentialGroup();
@@ -198,6 +208,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         groupV.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).
                         addComponent(labelOutTitle).
                         addComponent(comboxOut));
+        groupV.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).
+                        addComponent(labelInst).
+                        addComponent(spinInst));
         layout.setVerticalGroup(groupV);
 
         return pane;
@@ -208,6 +221,33 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
         result.setFocusable(true);
         result.addKeyListener(keyboard);
         return result;
+    }
+
+    private JSpinner newSpinner() {
+        int max = getMaxInstruments();
+        if (max > 0) {
+            --max;
+        }
+        SpinnerNumberModel numModel = new SpinnerNumberModel(0, 0, max, 1);
+        JSpinner result = new JSpinner(numModel);
+        result.setEditor(new JSpinner.DefaultEditor(result));
+        result.addChangeListener(this);
+        return result;
+    }
+
+    private int getMaxInstruments() {
+        if (!(midiOut instanceof Synthesizer)) {
+            System.out.println("" + midiOut + " is not a Synthesizer.");
+            return 0;
+        }
+        Synthesizer synth = (Synthesizer)midiOut;
+        Soundbank bank = synth.getDefaultSoundbank();
+        if (bank == null) {
+            System.out.println("" + midiOut + " does not have a SoundBank.");
+            return 0;
+        }
+        Instrument[] insts = synth.getDefaultSoundbank().getInstruments();
+        return insts.length;
     }
 
     private GroupLayout setGroupLayout(JPanel pane) {
@@ -299,6 +339,11 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
             resetMidiOut(comboxOut.getItemAt(comboxOut.getSelectedIndex()));
             return;
         }
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent event) {
+        System.out.println("stateChanged");
     }
 
     private void resetMidiIn(String item) {
