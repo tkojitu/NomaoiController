@@ -1,10 +1,24 @@
 package nomaoi;
 
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import javax.sound.midi.*;
-import javax.swing.*;
+import javax.sound.midi.Instrument;
+import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.Soundbank;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Transmitter;
+import javax.swing.GroupLayout;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
     private MidiDevice midiIn;
@@ -353,26 +367,5 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
             }
         }
         return -1;
-    }
-}
-
-class AsSoonAsPossibleReceiver implements Receiver {
-    private Receiver receiver;
-
-    public AsSoonAsPossibleReceiver(Receiver realReceiver) {
-        receiver = realReceiver;
-    }
-
-    @Override
-    public void close() {
-        if (receiver == null) {
-            return;
-        }
-        receiver.close();
-    }
-
-    @Override
-    public void send(MidiMessage message, long timeStamp) {
-        receiver.send(message, -1);
     }
 }
