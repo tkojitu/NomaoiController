@@ -31,6 +31,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     private MidiDevice midiIn;
     private MidiDevice midiOut;
     private PCKeyboard keyboard = new PCKeyboard();
+    private JLabel keyLabel;
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
     private JSpinner spinInst;
@@ -66,6 +67,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private MidiDevice findMidiInDevice(int index) throws MidiUnavailableException {
+        if (index < 0) {
+            return keyboard;
+        }
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         if (0 <= index && index < infos.length) {
             return MidiSystem.getMidiDevice(infos[index]);
@@ -161,6 +165,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         JPanel pane = new JPanel();
         GroupLayout layout = setGroupLayout(pane);
         JLabel labelInTitle = newLabel("MIDI Input:");
+        keyLabel = labelInTitle;
         comboxIn = newCombox(midiIn);
         JLabel labelOutTitle = newLabel("MIDI Output:");
         comboxOut = newCombox(midiOut);
@@ -215,14 +220,6 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         return insts.length;
     }
 
-    private GroupLayout setGroupLayout(JPanel pane) {
-        GroupLayout layout = new GroupLayout(pane);
-        layout.setAutoCreateGaps(true);
-        layout.setAutoCreateContainerGaps(true);
-        pane.setLayout(layout);
-        return layout;
-    }
-
     private JComboBox<String> newCombox(MidiDevice dev) {
         JComboBox<String> combox = new JComboBox<String>(getMidiDeviceNames());
         setSelectComboxItem(combox, dev);
@@ -232,6 +229,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
 
     private Vector<String> getMidiDeviceNames() {
         Vector<String> results = new Vector<String>();
+        results.add("-1: " + keyboard.getDeviceInfo().getName());
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
             results.add("" + i + ": " + infos[i].getName());
@@ -240,11 +238,11 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private void setSelectComboxItem(JComboBox<String> combox, MidiDevice dev) {
+        int indexDev = getMidiDeviceIndex(dev);
         for (int i = 0; i < combox.getItemCount(); ++i) {
             String str = combox.getItemAt(i);
             int n = extractIndexFromItem(str);
-            int m = getMidiDeviceIndex(dev);
-            if (n < 0 || m < 0 || n != m) {
+            if (n != indexDev) {
                 continue;
             }
             combox.setSelectedIndex(i);
@@ -265,10 +263,14 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private int getMidiDeviceIndex(MidiDevice dev) {
+        if (dev == keyboard) {
+            return -1;
+        }
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
             try {
-                if (MidiSystem.getMidiDevice(infos[i]) == dev) {
+                MidiDevice d = MidiSystem.getMidiDevice(infos[i]);
+                if (isEqualDevice(d, dev)) {
                     return i;
                 }
             } catch (MidiUnavailableException e) {
@@ -276,6 +278,23 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
             }
         }
         return -1;
+    }
+
+    private boolean isEqualDevice(MidiDevice d, MidiDevice e) {
+        if (d == e) {
+            return true;
+        }
+        if (d == null || e == null) {
+            return false;
+        }
+        if (!d.getClass().equals(e.getClass())) {
+            return false;
+        }
+        MidiDevice.Info di = d.getDeviceInfo();
+        MidiDevice.Info ei = e.getDeviceInfo();
+        return di.getName().equals(ei.getName())
+            && di.getVendor().equals(ei.getVendor())
+            && di.getVersion().equals(ei.getVersion());
     }
 
     private JSpinner newSpinner() {
@@ -289,6 +308,14 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         result.setEditor(new JSpinner.DefaultEditor(result));
         result.addChangeListener(this);
         return result;
+    }
+
+    private GroupLayout setGroupLayout(JPanel pane) {
+        GroupLayout layout = new GroupLayout(pane);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        pane.setLayout(layout);
+        return layout;
     }
 
     @Override
@@ -311,26 +338,18 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         Object src = event.getSource();
         if (src == comboxIn) {
             resetMidiIn(comboxIn.getItemAt(comboxIn.getSelectedIndex()));
-            return;
-        }
-        if (src == comboxOut) {
+        } else if (src == comboxOut) {
             resetMidiOut(comboxOut.getItemAt(comboxOut.getSelectedIndex()));
-            return;
         }
+        keyLabel.requestFocusInWindow();
     }
 
     private void resetMidiIn(String item) {
         int indexIn = extractIndexFromItem(item);
-        if (indexIn < 0) {
-            return;
-        }
         int indexOut = getMidiDeviceIndex(midiOut);
-        if (indexOut < 0) {
-            return;
-        }
         close();
         try {
-            setup(indexIn, indexOut, 0);
+            setup(indexIn, indexOut, indexInst);
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         }
@@ -338,16 +357,10 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
 
     private void resetMidiOut(String item) {
         int indexOut = extractIndexFromItem(item);
-        if (indexOut < 0) {
-            return;
-        }
         int indexIn = getMidiDeviceIndex(midiIn);
-        if (indexIn < 0) {
-            return;
-        }
         close();
         try {
-            setup(indexIn, indexOut, 0);
+            setup(indexIn, indexOut, indexInst);
         } catch (MidiUnavailableException e) {
             e.printStackTrace();
         }
