@@ -22,7 +22,6 @@ public class PCKeyboard implements KeyListener, MidiDevice {
 
     @Override
     public void keyPressed(KeyEvent event) {
-        System.out.println("keyPressed");
         if (closing) {
             return;
         }

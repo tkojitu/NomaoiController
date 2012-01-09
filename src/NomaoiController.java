@@ -177,13 +177,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
     private JPanel newPane() {
         JPanel pane = new JPanel();
         GroupLayout layout = setGroupLayout(pane);
-        JLabel labelInTitle = new JLabel("MIDI Input: ");
-        labelInTitle.setFocusable(true);
-        labelInTitle.addKeyListener(keyboard);
+        JLabel labelInTitle = newLabel("MIDI Input:");
         comboxIn = newCombox(midiIn);
-        JLabel labelOutTitle = new JLabel("MIDI Output: ");
-        labelOutTitle.setFocusable(true);
-        labelOutTitle.addKeyListener(keyboard);
+        JLabel labelOutTitle = newLabel("MIDI Output:");
         comboxOut = newCombox(midiOut);
 
         GroupLayout.SequentialGroup groupH = layout.createSequentialGroup();
@@ -203,7 +199,15 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
                         addComponent(labelOutTitle).
                         addComponent(comboxOut));
         layout.setVerticalGroup(groupV);
+
         return pane;
+    }
+
+    private JLabel newLabel(String text) {
+        JLabel result = new JLabel(text);
+        result.setFocusable(true);
+        result.addKeyListener(keyboard);
+        return result;
     }
 
     private GroupLayout setGroupLayout(JPanel pane) {
