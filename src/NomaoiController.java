@@ -2,18 +2,8 @@ package nomaoi;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.StringTokenizer;
-import java.util.Vector;
-import javax.sound.midi.Instrument;
-import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Soundbank;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.Transmitter;
 import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -74,9 +64,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         GroupLayout layout = setGroupLayout(pane);
         JLabel labelInTitle = newLabel("MIDI Input:");
         keyLabel = labelInTitle;
-        comboxIn = newCombox(model.midiIn);
+        comboxIn = newComboxIn();
         JLabel labelOutTitle = newLabel("MIDI Output:");
-        comboxOut = newCombox(model.midiOut);
+        comboxOut = newComboxOut();
         JLabel labelInst = newLabel("Instrument:");
         spinInst = newSpinner();
 
@@ -113,24 +103,18 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         return result;
     }
 
-    private JComboBox<String> newCombox(MidiDevice dev) {
+    private JComboBox<String> newComboxIn() {
         JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
-        setSelectComboxItem(combox, dev);
+        combox.setSelectedIndex(model.getMidiDeviceIndexIn());
         combox.addActionListener(this);
         return combox;
     }
 
-    private void setSelectComboxItem(JComboBox<String> combox, MidiDevice dev) {
-        int indexDev = model.getMidiDeviceIndex(dev);
-        for (int i = 0; i < combox.getItemCount(); ++i) {
-            String str = combox.getItemAt(i);
-            int n = model.extractIndexFromItem(str);
-            if (n != indexDev) {
-                continue;
-            }
-            combox.setSelectedIndex(i);
-            return;
-        }
+    private JComboBox<String> newComboxOut() {
+        JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
+        combox.setSelectedIndex(model.getMidiDeviceIndexOut());
+        combox.addActionListener(this);
+        return combox;
     }
 
     private JSpinner newSpinner() {
@@ -174,6 +158,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     public void stateChanged(ChangeEvent event) {
         Number num = (Number)spinInst.getModel().getValue();
         model.programChange(num.intValue());
+        keyLabel.requestFocusInWindow();
     }
 
     public static void main(String[] args) throws Exception {
@@ -195,8 +180,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private static int getInstrumentIndex(String[] args) {
-        int n = getOptionArg(args, "-p");
-        return (n < 0) ? 0 : n;
+        return getOptionArg(args, "-p");
     }
 
     private static int getOptionArg(String[] args, String opt) {

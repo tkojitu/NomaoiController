@@ -46,8 +46,8 @@ class NCModel implements AutoCloseable {
         trans.setReceiver(recv);
         midiIn.open();
         midiOut.open();
-        this.indexInst = indexInst;
-        programChange(indexInst);
+        this.indexInst = (indexInst < 0) ? 0 : indexInst;
+        programChange(this.indexInst);
 
         System.out.println("Input:");
         dumpMidiDevice(midiIn);
@@ -58,12 +58,12 @@ class NCModel implements AutoCloseable {
     }
 
     private MidiDevice findMidiInDevice(int index) throws MidiUnavailableException {
-        if (index < 0) {
-            return keyboard;
-        }
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         if (0 <= index && index < infos.length) {
             return MidiSystem.getMidiDevice(infos[index]);
+        }
+        if (index == infos.length) {
+            return keyboard;
         }
         final String klass = "class com.sun.media.sound.MidiInDevice";
         for (int i = 0; i < infos.length; ++ i) {
@@ -173,11 +173,11 @@ class NCModel implements AutoCloseable {
 
     Vector<String> getMidiDeviceNames() {
         Vector<String> results = new Vector<String>();
-        results.add("-1: " + keyboard.getDeviceInfo().getName());
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
             results.add("" + i + ": " + infos[i].getName());
         }
+        results.add("" + infos.length + ": " + keyboard.getDeviceInfo().getName());
         return results;
     }
 
@@ -193,10 +193,15 @@ class NCModel implements AutoCloseable {
         }
     }
 
-    int getMidiDeviceIndex(MidiDevice dev) {
-        if (dev == keyboard) {
-            return -1;
-        }
+    int getMidiDeviceIndexIn() {
+        return getMidiDeviceIndex(midiIn);
+    }
+
+    int getMidiDeviceIndexOut() {
+        return getMidiDeviceIndex(midiOut);
+    }
+
+    private int getMidiDeviceIndex(MidiDevice dev) {
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
             try {
@@ -207,6 +212,9 @@ class NCModel implements AutoCloseable {
             } catch (MidiUnavailableException e) {
                 continue;
             }
+        }
+        if (isEqualDevice(keyboard, dev)) {
+            return infos.length;
         }
         return -1;
     }
