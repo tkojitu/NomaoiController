@@ -15,8 +15,8 @@ import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Transmitter;
 
 class NCModel implements AutoCloseable {
-    MidiDevice midiIn;
-    MidiDevice midiOut;
+    private MidiDevice midiIn;
+    private MidiDevice midiOut;
     private PCKeyboard keyboard = new PCKeyboard();
     private ShortMessage message = new ShortMessage();
     private int indexInst = 0;
@@ -149,20 +149,17 @@ class NCModel implements AutoCloseable {
         }
     }
 
-    void resetMidiIn(String item) {
-        int indexIn = extractIndexFromItem(item);
-        int indexOut = getMidiDeviceIndex(midiOut);
-        close();
-        try {
-            setup(indexIn, indexOut, indexInst);
-        } catch (MidiUnavailableException e) {
-            e.printStackTrace();
-        }
+    void resetMidiIn(String deviceName) {
+        resetMidiDevice(deviceName, midiOut);
     }
 
-    void resetMidiOut(String item) {
-        int indexOut = extractIndexFromItem(item);
-        int indexIn = getMidiDeviceIndex(midiIn);
+    void resetMidiOut(String deviceName) {
+        resetMidiDevice(deviceName, midiIn);
+    }
+
+    private void resetMidiDevice(String deviceName, MidiDevice dev) {
+        int indexOut = extractIndexFromDeviceName(deviceName);
+        int indexIn = getMidiDeviceIndex(dev);
         close();
         try {
             setup(indexIn, indexOut, indexInst);
@@ -181,8 +178,8 @@ class NCModel implements AutoCloseable {
         return results;
     }
 
-    int extractIndexFromItem(String item) {
-        StringTokenizer tokens = new StringTokenizer(item, ": \t");
+    private int extractIndexFromDeviceName(String deviceName) {
+        StringTokenizer tokens = new StringTokenizer(deviceName, ": \t");
         if (!tokens.hasMoreTokens()) {
             return -1;
         }
