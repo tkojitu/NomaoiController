@@ -104,15 +104,16 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private JComboBox<String> newComboxIn() {
-        JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
-        combox.setSelectedIndex(model.getMidiDeviceIndexIn());
-        combox.addActionListener(this);
-        return combox;
+        return newCombox(model.getMidiDeviceIndexIn());
     }
 
     private JComboBox<String> newComboxOut() {
+        return newCombox(model.getMidiDeviceIndexOut());
+    }
+
+    private JComboBox<String> newCombox(int deviceIndex) {
         JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
-        combox.setSelectedIndex(model.getMidiDeviceIndexOut());
+        combox.setSelectedIndex(deviceIndex);
         combox.addActionListener(this);
         return combox;
     }
