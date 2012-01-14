@@ -10,8 +10,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
     private JFrame frame;
