@@ -233,18 +233,22 @@ class NCModel implements AutoCloseable {
             && di.getVersion().equals(ei.getVersion());
     }
 
-    int getMaxInstruments() {
+    Vector<String> getInstNames() {
+        Vector<String> results = new Vector<String>();
         if (!(midiOut instanceof Synthesizer)) {
             System.out.println("" + midiOut.getDeviceInfo() + " is not a Synthesizer.");
-            return 128;
+            return results;
         }
         Synthesizer synth = (Synthesizer)midiOut;
         Soundbank bank = synth.getDefaultSoundbank();
         if (bank == null) {
             System.out.println("" + midiOut + " does not have a SoundBank.");
-            return 0;
+            return results;
         }
         Instrument[] insts = synth.getDefaultSoundbank().getInstruments();
-        return insts.length;
+        for (int i = 0; i < insts.length; ++i) {
+            results.add("" + i + ": " + insts[i].getName());
+        }
+        return results;
     }
 }

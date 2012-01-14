@@ -9,19 +9,16 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class NomaoiController implements ActionListener, AutoCloseable, ChangeListener,
-                                         Runnable {
+public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
     private JFrame frame;
     private JLabel keyLabel;
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
-    private JSpinner spinInst;
+    private JComboBox<String> comboxInst;
     private NCModel model = new NCModel();
 
     public NomaoiController() {}
@@ -68,7 +65,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         JLabel labelOutTitle = newLabel("MIDI Output:");
         comboxOut = newComboxOut();
         JLabel labelInst = newLabel("Instrument:");
-        spinInst = newSpinner();
+        comboxInst = newComboxInst();
 
         GroupLayout.SequentialGroup groupH = layout.createSequentialGroup();
         groupH.addGroup(layout.createParallelGroup().
@@ -78,7 +75,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
         groupH.addGroup(layout.createParallelGroup().
                         addComponent(comboxIn).
                         addComponent(comboxOut).
-                        addComponent(spinInst));
+                        addComponent(comboxInst));
         layout.setHorizontalGroup(groupH);
 
         GroupLayout.SequentialGroup groupV = layout.createSequentialGroup();
@@ -90,7 +87,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
                         addComponent(comboxOut));
         groupV.addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE).
                         addComponent(labelInst).
-                        addComponent(spinInst));
+                        addComponent(comboxInst));
         layout.setVerticalGroup(groupV);
 
         return pane;
@@ -104,31 +101,25 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
     }
 
     private JComboBox<String> newComboxIn() {
-        return newCombox(model.getMidiDeviceIndexIn());
+        return newComboxDevice(model.getMidiDeviceIndexIn());
     }
 
     private JComboBox<String> newComboxOut() {
-        return newCombox(model.getMidiDeviceIndexOut());
+        return newComboxDevice(model.getMidiDeviceIndexOut());
     }
 
-    private JComboBox<String> newCombox(int deviceIndex) {
+    private JComboBox<String> newComboxDevice(int deviceIndex) {
         JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
         combox.setSelectedIndex(deviceIndex);
         combox.addActionListener(this);
         return combox;
     }
 
-    private JSpinner newSpinner() {
-        int max = model.getMaxInstruments();
-        if (max > 0) {
-            --max;
-        }
-        SpinnerNumberModel numModel = new SpinnerNumberModel(0, 0, max, 1);
-        JSpinner result = new JSpinner(numModel);
-        result.getModel().setValue(new Integer(model.getIndexInst()));
-        result.setEditor(new JSpinner.DefaultEditor(result));
-        result.addChangeListener(this);
-        return result;
+    private JComboBox<String> newComboxInst() {
+        JComboBox<String> combox = new JComboBox<String>(model.getInstNames());
+        combox.setSelectedIndex(model.getIndexInst());
+        combox.addActionListener(this);
+        return combox;
     }
 
     private GroupLayout setGroupLayout(JPanel pane) {
@@ -151,14 +142,9 @@ public class NomaoiController implements ActionListener, AutoCloseable, ChangeLi
             model.resetMidiIn(comboxIn.getItemAt(comboxIn.getSelectedIndex()));
         } else if (src == comboxOut) {
             model.resetMidiOut(comboxOut.getItemAt(comboxOut.getSelectedIndex()));
+        } else if (src == comboxInst) {
+            model.programChange(comboxInst.getSelectedIndex());
         }
-        keyLabel.requestFocusInWindow();
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent event) {
-        Number num = (Number)spinInst.getModel().getValue();
-        model.programChange(num.intValue());
         keyLabel.requestFocusInWindow();
     }
 
