@@ -172,10 +172,30 @@ class NCModel implements AutoCloseable {
         Vector<String> results = new Vector<String>();
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
-            results.add("" + i + ": " + infos[i].getName());
+            results.add(getMidiDeviceName(i, infos[i]));
         }
         results.add("" + infos.length + ": " + keyboard.getDeviceInfo().getName());
         return results;
+    }
+
+    private String getMidiDeviceName(int index, MidiDevice.Info info) {
+        StringBuffer buf = new StringBuffer();
+        buf.append(index);
+        buf.append(": ");
+        buf.append(info.getName());
+        final String inClass = "class com.sun.media.sound.MidiInDevice";
+        final String outClass = "class com.sun.media.sound.MidiOutDevice";
+        try {
+            MidiDevice dev = MidiSystem.getMidiDevice(info);
+            if (inClass.equals(dev.getClass().toString())) {
+                buf.append(" (IN)");
+            } else if (outClass.equals(dev.getClass().toString())) {
+                buf.append(" (OUT)");
+            }
+        } catch (MidiUnavailableException e) {
+            // ignore
+        }
+        return buf.toString();
     }
 
     private int extractIndexFromDeviceName(String deviceName) {
