@@ -15,8 +15,13 @@ public class NomaoiMetronome implements MetaEventListener {
             Sequence seq = createSequence();
             startSequence(seq);
         } catch (InvalidMidiDataException | MidiUnavailableException ex) {
-            Logger.getLogger(NomaoiMetronome.class.getName()).log(Level.SEVERE, null, ex);
+            log(ex);
         }
+    }
+
+    private void log(Exception ex) {
+        String classname = NomaoiMetronome.class.getName();
+        Logger.getLogger(classname).log(Level.SEVERE, null, ex);
     }
 
     private void openSequencer() throws MidiUnavailableException {
@@ -44,13 +49,16 @@ public class NomaoiMetronome implements MetaEventListener {
             track.add(evt);
             return seq;
         } catch (InvalidMidiDataException ex) {
-            Logger.getLogger(NomaoiMetronome.class.getName()).log(Level.SEVERE, null, ex);
+            log(ex);
             return null;
         }
     }
 
-    private void addNoteEvent(Track track, long tick) throws InvalidMidiDataException {
-        ShortMessage message = new ShortMessage(ShortMessage.NOTE_ON, 9, 37, 100);
+    private void addNoteEvent(Track track, long tick)
+    throws InvalidMidiDataException {
+        final int velocity = 100;
+        ShortMessage message =
+                new ShortMessage(ShortMessage.NOTE_ON, 9, 37, velocity);
         MidiEvent event = new MidiEvent(message, tick);
         track.add(event);
     }
