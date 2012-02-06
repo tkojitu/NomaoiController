@@ -35,18 +35,12 @@ public class NomaoiMetronome implements MetaEventListener {
             Sequence seq = new Sequence(Sequence.PPQ, 1);
             Track track = seq.createTrack();
 
-            ShortMessage msg = new ShortMessage(ShortMessage.PROGRAM_CHANGE, 9, 1, 0);
-            MidiEvent evt = new MidiEvent(msg, 0);
-            track.add(evt);
-
-            addNoteEvent(track, 0);
-            addNoteEvent(track, 1);
-            addNoteEvent(track, 2);
-            addNoteEvent(track, 3);
-
-            msg = new ShortMessage(ShortMessage.PROGRAM_CHANGE, 9, 1, 0);
-            evt = new MidiEvent(msg, 4);
-            track.add(evt);
+            addProgramChange(track, 0);
+            addNoteOn(track, 0);
+            addNoteOn(track, 1);
+            addNoteOn(track, 2);
+            addNoteOn(track, 3);
+            addProgramChange(track, 4);
             return seq;
         } catch (InvalidMidiDataException ex) {
             log(ex);
@@ -54,7 +48,15 @@ public class NomaoiMetronome implements MetaEventListener {
         }
     }
 
-    private void addNoteEvent(Track track, long tick)
+    private void addProgramChange(Track track, long tick)
+    throws InvalidMidiDataException {
+        ShortMessage message =
+                new ShortMessage(ShortMessage.PROGRAM_CHANGE, 9, 1, 0);
+        MidiEvent event = new MidiEvent(message, tick);
+        track.add(event);
+    }
+
+    private void addNoteOn(Track track, long tick)
     throws InvalidMidiDataException {
         final int velocity = 100;
         ShortMessage message =
