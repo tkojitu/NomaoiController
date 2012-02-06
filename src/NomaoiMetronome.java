@@ -7,6 +7,7 @@ import javax.sound.midi.*;
 public class NomaoiMetronome implements MetaEventListener {
     private Sequencer sequencer;
     private int bpm;
+    final int channgel = 9;
 
     public void start(int bpm) {
         try {
@@ -34,7 +35,6 @@ public class NomaoiMetronome implements MetaEventListener {
         try {
             Sequence seq = new Sequence(Sequence.PPQ, 1);
             Track track = seq.createTrack();
-
             addProgramChange(track, 0);
             addNoteOn(track, 0);
             addNoteOn(track, 1);
@@ -50,17 +50,18 @@ public class NomaoiMetronome implements MetaEventListener {
 
     private void addProgramChange(Track track, long tick)
     throws InvalidMidiDataException {
-        ShortMessage message =
-                new ShortMessage(ShortMessage.PROGRAM_CHANGE, 9, 1, 0);
+        ShortMessage message = new ShortMessage(ShortMessage.PROGRAM_CHANGE,
+                                                channel, 1, 0);
         MidiEvent event = new MidiEvent(message, tick);
         track.add(event);
     }
 
     private void addNoteOn(Track track, long tick)
     throws InvalidMidiDataException {
+        final int instrument = 37;
         final int velocity = 100;
-        ShortMessage message =
-                new ShortMessage(ShortMessage.NOTE_ON, 9, 37, velocity);
+        ShortMessage message = new ShortMessage(ShortMessage.NOTE_ON, channel,
+                                                instrument, velocity);
         MidiEvent event = new MidiEvent(message, tick);
         track.add(event);
     }
@@ -73,7 +74,7 @@ public class NomaoiMetronome implements MetaEventListener {
 
     @Override
     public void meta(MetaMessage message) {
-        if (message.getType() != 47) {  // 47 is end of track
+        if (message.getType() != 47) {  // end of track
             return;
         }
         doLoop();
