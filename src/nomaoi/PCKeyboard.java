@@ -149,7 +149,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
 
     @Override
     public List<Receiver> getReceivers() {
-        return new ArrayList<Receiver>();
+        return new ArrayList<>();
     }
 
     @Override
@@ -159,7 +159,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
 
     @Override
     public List<Transmitter> getTransmitters() {
-        List<Transmitter> results = new ArrayList<Transmitter>();
+        List<Transmitter> results = new ArrayList<>();
         results.add(transmitter);
         return results;
     }

@@ -1,8 +1,8 @@
 package nomaoi;
 
 import java.awt.event.KeyListener;
-import java.util.Vector;
 import java.util.StringTokenizer;
+import java.util.Vector;
 import javax.sound.midi.Instrument;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiDevice;
@@ -98,9 +98,7 @@ class NCModel implements AutoCloseable {
             message.setMessage(ShortMessage.PROGRAM_CHANGE, 0, indexInst, 0);
             Receiver recv = midiOut.getReceiver();
             recv.send(message, -1);
-        } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
-        } catch (MidiUnavailableException e) {
+        } catch (InvalidMidiDataException | MidiUnavailableException e) {
             e.printStackTrace();
         }
     }
@@ -169,7 +167,7 @@ class NCModel implements AutoCloseable {
     }
 
     Vector<String> getMidiDeviceNames() {
-        Vector<String> results = new Vector<String>();
+        Vector<String> results = new Vector<>();
         MidiDevice.Info[] infos = MidiSystem.getMidiDeviceInfo();
         for (int i = 0; i < infos.length; ++i) {
             results.add(getMidiDeviceName(i, infos[i]));
@@ -179,7 +177,7 @@ class NCModel implements AutoCloseable {
     }
 
     private String getMidiDeviceName(int index, MidiDevice.Info info) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(index);
         buf.append(": ");
         buf.append(info.getName());
@@ -187,10 +185,13 @@ class NCModel implements AutoCloseable {
         final String outClass = "class com.sun.media.sound.MidiOutDevice";
         try {
             MidiDevice dev = MidiSystem.getMidiDevice(info);
-            if (inClass.equals(dev.getClass().toString())) {
+            switch (dev.getClass().toString()) {
+            case inClass:
                 buf.append(" (IN)");
-            } else if (outClass.equals(dev.getClass().toString())) {
+                break;
+            case outClass:
                 buf.append(" (OUT)");
+                break;
             }
         } catch (MidiUnavailableException e) {
             // ignore
@@ -254,7 +255,7 @@ class NCModel implements AutoCloseable {
     }
 
     Vector<String> getInstNames() {
-        Vector<String> results = new Vector<String>();
+        Vector<String> results = new Vector<>();
         if (!(midiOut instanceof Synthesizer)) {
             System.out.println("" + midiOut.getDeviceInfo() + " is not a Synthesizer.");
             return results;

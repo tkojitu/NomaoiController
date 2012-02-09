@@ -7,7 +7,7 @@ import javax.sound.midi.*;
 public class NomaoiMetronome implements MetaEventListener {
     private Sequencer sequencer;
     private int bpm;
-    final int channgel = 9;
+    final int channel = 9;
 
     public void start(int bpm) {
         try {

@@ -2,7 +2,6 @@ package nomaoi;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.GroupLayout;
 import javax.swing.JComboBox;
@@ -107,7 +106,7 @@ public class NomaoiController implements ActionListener, AutoCloseable, Runnable
     }
 
     private JComboBox<String> newComboxDevice(int deviceIndex) {
-        JComboBox<String> combox = new JComboBox<String>(model.getMidiDeviceNames());
+        JComboBox<String> combox = new JComboBox<>(model.getMidiDeviceNames());
         combox.setSelectedIndex(deviceIndex);
         combox.addActionListener(this);
         return combox;
