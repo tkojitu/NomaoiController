@@ -2,14 +2,28 @@ package nomaoi;
 
 import javax.sound.midi.*;
 
-public class NomaoiMetronome implements MetaEventListener {
+public class MetronomeModel implements MetaEventListener {
     private Sequencer sequencer;
     private int bpm;
     final int channel = 9;
 
-    public void start(int bpm) {
+    public MetronomeModel(int bpm) {
+        this.bpm = bpm;
+    }
+
+    public int getBpm() {
+        return bpm;
+    }
+
+    public void setBpm(int value) {
+        bpm = value;
+    }
+
+    public void start() {
+        if (sequencer != null && sequencer.isRunning()) {
+            return;
+        }
         try {
-            this.bpm = bpm;
             openSequencer();
             Sequence seq = createSequence();
             startSequence(seq);
@@ -65,6 +79,13 @@ public class NomaoiMetronome implements MetaEventListener {
         sequencer.start();
     }
 
+    public void stop() {
+        if (sequencer == null) {
+            return;
+        }
+        sequencer.stop();
+    }
+
     @Override
     public void meta(MetaMessage message) {
         if (message.getType() != 47) {  // end of track
@@ -93,6 +114,6 @@ public class NomaoiMetronome implements MetaEventListener {
             if (bpm == 0)
                 bpm = 60;
         }
-        new NomaoiMetronome().start(bpm);
+        new MetronomeModel(bpm).start();
     }
 }
