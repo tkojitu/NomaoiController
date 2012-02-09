@@ -1,7 +1,5 @@
 package nomaoi;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sound.midi.*;
 
 public class NomaoiMetronome implements MetaEventListener {
@@ -15,14 +13,9 @@ public class NomaoiMetronome implements MetaEventListener {
             openSequencer();
             Sequence seq = createSequence();
             startSequence(seq);
-        } catch (InvalidMidiDataException | MidiUnavailableException ex) {
-            log(ex);
+        } catch (InvalidMidiDataException | MidiUnavailableException e) {
+            e.printStackTrace();
         }
-    }
-
-    private void log(Exception ex) {
-        String classname = NomaoiMetronome.class.getName();
-        Logger.getLogger(classname).log(Level.SEVERE, null, ex);
     }
 
     private void openSequencer() throws MidiUnavailableException {
@@ -42,8 +35,8 @@ public class NomaoiMetronome implements MetaEventListener {
             addNoteOn(track, 3);
             addProgramChange(track, 4);
             return seq;
-        } catch (InvalidMidiDataException ex) {
-            log(ex);
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
             return null;
         }
     }

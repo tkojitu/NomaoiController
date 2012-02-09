@@ -1,7 +1,6 @@
 package nomaoi;
 
-import javax.sound.midi.MidiMessage;
-import javax.sound.midi.Receiver;
+import javax.sound.midi.*;
 
 class AsSoonAsPossibleReceiver implements Receiver {
     private Receiver receiver;

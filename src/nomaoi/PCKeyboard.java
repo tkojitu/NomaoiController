@@ -1,15 +1,8 @@
 package nomaoi;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.ArrayList;
-import java.util.List;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.Transmitter;
+import java.awt.event.*;
+import java.util.*;
+import javax.sound.midi.*;
 
 public class PCKeyboard implements KeyListener, MidiDevice {
     private PCKeyboardTransmitter transmitter = new PCKeyboardTransmitter();

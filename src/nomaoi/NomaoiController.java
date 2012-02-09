@@ -1,14 +1,8 @@
 package nomaoi;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.sound.midi.MidiUnavailableException;
-import javax.swing.GroupLayout;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import java.awt.event.*;
+import javax.sound.midi.*;
+import javax.swing.*;
 
 public class NomaoiController implements ActionListener, AutoCloseable, Runnable {
     private JFrame frame;
