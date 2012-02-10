@@ -2,6 +2,7 @@ package nomaoi;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 
 public class NomaoiController implements Runnable {
     private Connector connector = new Connector();
@@ -24,7 +25,9 @@ public class NomaoiController implements Runnable {
     private JFrame newFrame() {
         frame = new JFrame("NomaoiController");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setContentPane(connector.createPane());
+        JPanel pane = connector.createPane();
+        pane.setBorder(new TitledBorder("Connector"));
+        frame.setContentPane(pane);
         frame.pack();
         return frame;
     }
