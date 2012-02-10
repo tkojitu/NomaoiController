@@ -5,14 +5,12 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import javax.sound.midi.*;
 
-class NCModel implements AutoCloseable {
+class ConnectorModel implements AutoCloseable {
     private MidiDevice midiIn;
     private MidiDevice midiOut;
     private PCKeyboard keyboard = new PCKeyboard();
     private ShortMessage message = new ShortMessage();
     private int indexInst = 0;
-
-    NCModel() {}
 
     KeyListener getKeyListener() {
         return keyboard;

@@ -10,7 +10,7 @@ public class Connector implements ActionListener, AutoCloseable, Runnable {
     private JComboBox<String> comboxIn;
     private JComboBox<String> comboxOut;
     private JComboBox<String> comboxInst;
-    private NCModel model = new NCModel();
+    private ConnectorModel model = new ConnectorModel();
 
     @Override
     protected void finalize() throws Throwable {
