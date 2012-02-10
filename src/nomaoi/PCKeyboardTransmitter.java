@@ -1,6 +1,9 @@
 package nomaoi;
 
-import javax.sound.midi.*;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.Receiver;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Transmitter;
 
 class PCKeyboardTransmitter implements Transmitter {
     private Receiver receiver;

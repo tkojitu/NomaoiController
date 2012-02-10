@@ -1,11 +1,15 @@
 package nomaoi;
 
 import javax.sound.midi.MidiUnavailableException;
-import javax.swing.*;
+import javax.swing.GroupLayout;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 public class NomaoiController implements Runnable {
     private Connector connector = new Connector();
+    private Metronome metronome = new Metronome(60);
     private JFrame frame;
 
     public void dumpMidiDevices() throws MidiUnavailableException {
@@ -22,12 +26,33 @@ public class NomaoiController implements Runnable {
         frame.setVisible(true);
     }
 
+    public JPanel createPane() {
+        JPanel pane = new JPanel();
+        GroupLayout layout = new GroupLayout(pane);
+        layout.setAutoCreateGaps(true);
+        layout.setAutoCreateContainerGaps(true);
+        pane.setLayout(layout);
+
+        JPanel connPane = connector.createPane();
+        connPane.setBorder(new TitledBorder("Connector"));
+        JPanel metroPane = metronome.createPane();
+        metroPane.setBorder(new TitledBorder("Metronome"));
+
+        GroupLayout.ParallelGroup groupH = 
+                layout.createParallelGroup(GroupLayout.Alignment.LEADING);
+        groupH.addComponent(connPane).addComponent(metroPane);
+        layout.setHorizontalGroup(groupH);
+
+        GroupLayout.SequentialGroup groupV = layout.createSequentialGroup();
+        groupV.addComponent(connPane).addComponent(metroPane);
+        layout.setVerticalGroup(groupV);
+        return pane;
+    }
+
     private JFrame newFrame() {
         frame = new JFrame("NomaoiController");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel pane = connector.createPane();
-        pane.setBorder(new TitledBorder("Connector"));
-        frame.setContentPane(pane);
+        frame.setContentPane(createPane());
         frame.pack();
         return frame;
     }

@@ -28,7 +28,7 @@ public class MetronomeModel implements MetaEventListener {
             Sequence seq = createSequence();
             startSequence(seq);
         } catch (InvalidMidiDataException | MidiUnavailableException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
@@ -50,7 +50,7 @@ public class MetronomeModel implements MetaEventListener {
             addProgramChange(track, 4);
             return seq;
         } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             return null;
         }
     }

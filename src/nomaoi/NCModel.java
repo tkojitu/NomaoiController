@@ -1,7 +1,8 @@
 package nomaoi;
 
 import java.awt.event.KeyListener;
-import java.util.*;
+import java.util.StringTokenizer;
+import java.util.Vector;
 import javax.sound.midi.*;
 
 class NCModel implements AutoCloseable {
@@ -89,7 +90,7 @@ class NCModel implements AutoCloseable {
             Receiver recv = midiOut.getReceiver();
             recv.send(message, -1);
         } catch (InvalidMidiDataException | MidiUnavailableException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 
@@ -152,7 +153,7 @@ class NCModel implements AutoCloseable {
         try {
             setup(indexIn, indexOut, indexInst);
         } catch (MidiUnavailableException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
     }
 

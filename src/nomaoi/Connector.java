@@ -1,7 +1,8 @@
 package nomaoi;
 
-import java.awt.event.*;
-import javax.sound.midi.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.sound.midi.MidiUnavailableException;
 import javax.swing.*;
 
 public class Connector implements ActionListener, AutoCloseable, Runnable {
@@ -104,7 +105,7 @@ public class Connector implements ActionListener, AutoCloseable, Runnable {
     }
 
     private JComboBox<String> newComboxInst() {
-        JComboBox<String> combox = new JComboBox<String>(model.getInstNames());
+        JComboBox<String> combox = new JComboBox<>(model.getInstNames());
         combox.setSelectedIndex(model.getIndexInst());
         combox.addActionListener(this);
         return combox;

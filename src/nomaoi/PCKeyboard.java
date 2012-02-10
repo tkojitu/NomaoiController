@@ -1,7 +1,10 @@
 package nomaoi;
 
-import java.awt.event.*;
-import java.util.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.sound.midi.*;
 
 public class PCKeyboard implements KeyListener, MidiDevice {
@@ -36,7 +39,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
         try {
             transmitter.noteOff(channel, lastNote, velocity);
         } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
         }
         lastNote = -1;
     }
@@ -49,7 +52,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
             transmitter.noteOn(channel, note, velocity);
             lastNote = note;
         } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.err);
             lastNote = -1;
         }
     }
@@ -104,7 +107,7 @@ public class PCKeyboard implements KeyListener, MidiDevice {
             try {
                 transmitter.noteOff(channel, lastNote, velocity);
             } catch (InvalidMidiDataException e) {
-                e.printStackTrace();
+                e.printStackTrace(System.err);
             }
         }
         lastNote = -1;
