@@ -22,7 +22,7 @@ public class Metronome implements ActionListener, ChangeListener, Runnable {
         frame.setVisible(true);
     }
 
-    private JPanel createPane() {
+    public JPanel createPane() {
         JPanel pane = new JPanel();
         pane.add(createSpinner());
         pane.add(createStartButton());
